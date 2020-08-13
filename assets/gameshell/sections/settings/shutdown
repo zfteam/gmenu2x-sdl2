@@ -1,0 +1,5 @@
+title=关机
+description=关闭电源
+icon=skin:icons/exit.png
+exec=scripts/shutdown.sh
+wrapper=false

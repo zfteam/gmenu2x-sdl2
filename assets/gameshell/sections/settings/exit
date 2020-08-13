@@ -1,0 +1,4 @@
+title=退出
+description=退出到原ui
+icon=icons/supertux.png
+wrapper=false

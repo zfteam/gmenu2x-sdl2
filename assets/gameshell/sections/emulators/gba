@@ -1,0 +1,8 @@
+title=GBA游戏
+description=GBA Emulator
+icon=icons/regba.png
+exec=/home/cpi/apps/emulators/gPsp/gpsp
+selectordir=/home/cpi/games/GBA/
+selectorfilter=gba,zip
+selectorscreens=images/GBA
+wrapper=true

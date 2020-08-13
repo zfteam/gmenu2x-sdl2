@@ -1,0 +1,11 @@
+title=街机游戏
+description=FBA Emulator
+icon=icons/fbasdl.png
+exec=retroarch
+params=-L /home/cpi/apps/emulators/fbalpha_libretro.so $1
+clock=16784976
+selectordir=/home/cpi/games/FBA/
+selectorfilter=zip,ZIP
+selectorscreens=images/FBA
+selectoraliases=aliases.txt
+wrapper=true
