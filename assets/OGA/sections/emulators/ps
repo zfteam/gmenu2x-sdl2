@@ -1,0 +1,9 @@
+title=PS游戏
+description=PS Emulator
+icon=icons/pcsx4all.png
+exec=/home/cpi/apps/emulators/pcsx
+params=-cdfile $1
+selectordir=/home/cpi/games/PS/
+selectorfilter=bin,img,mdf,iso,cue,pbp,PBP,cbn,zip,rar
+selectorscreens=images/PS
+wrapper=true
