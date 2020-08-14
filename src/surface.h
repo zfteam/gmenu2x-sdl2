@@ -46,6 +46,7 @@ private:
 	SDL_Surface *dblbuffer;
 
 	SDL_Window* _sdlWindow;
+	SDL_Renderer* _softRenderer;
 public:
 	Surface();
 	Surface(const string &img, const string &skin="", bool alpha=true);
@@ -104,6 +105,8 @@ public:
 	int hline(Sint16, Sint16, Sint16, RGBAColor);
 
 	void setSDLWindow(SDL_Window* sdlWindow);
+
+	SDL_Renderer* surface2Renderer(SDL_Surface* sdlSurface);
 
 
 	void operator = (SDL_Surface*);

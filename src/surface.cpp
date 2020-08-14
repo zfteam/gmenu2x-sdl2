@@ -38,14 +38,18 @@ SDL_Color rgbatosdl(RGBAColor color) {
 	return (SDL_Color){color.r, color.g, color.b, color.a};
 }
 
+
+
 Surface::Surface() {
 	raw = NULL;
 	dblbuffer = NULL;
+	_softRenderer = NULL;
 }
 
 Surface::Surface(const string &img, bool alpha, const string &skin) {
 	raw = NULL;
 	dblbuffer = NULL;
+	_softRenderer = NULL;
 	load(img, alpha, skin);
 	halfW = raw->w/2;
 	halfH = raw->h/2;
@@ -54,6 +58,7 @@ Surface::Surface(const string &img, bool alpha, const string &skin) {
 Surface::Surface(const string &img, const string &skin, bool alpha) {
 	raw = NULL;
 	dblbuffer = NULL;
+	_softRenderer = NULL;
 	load(img, alpha, skin);
 	halfW = raw->w/2;
 	halfH = raw->h/2;
@@ -61,6 +66,7 @@ Surface::Surface(const string &img, const string &skin, bool alpha) {
 
 Surface::Surface(SDL_Surface *s, SDL_PixelFormat *fmt, Uint32 flags) {
 	dblbuffer = NULL;
+	_softRenderer = NULL;
 	this->operator =(s);
 	if (fmt!=NULL || flags!=0) {
 		if (fmt==NULL) fmt = s->format;
@@ -71,6 +77,7 @@ Surface::Surface(SDL_Surface *s, SDL_PixelFormat *fmt, Uint32 flags) {
 
 Surface::Surface(Surface *s) {
 	dblbuffer = NULL;
+	_softRenderer = NULL;
 	this->operator =(s->raw);
 	this->_sdlWindow = s->_sdlWindow;
 }
@@ -119,11 +126,17 @@ void Surface::enableAlpha() {
 	SDL_Surface *alpha_surface = SDL_ConvertSurfaceFormat(raw,SDL_PIXELFORMAT_RGBA8888, 0);
 	SDL_FreeSurface(raw);
 	raw = alpha_surface;
+
 }
 
 void Surface::free() {
 	SDL_FreeSurface( raw );
 	SDL_FreeSurface( dblbuffer );
+
+	if(NULL!=_softRenderer){
+		SDL_DestroyRenderer(_softRenderer);
+	}
+
 	raw = NULL;
 	dblbuffer = NULL;
 }
@@ -305,11 +318,11 @@ void Surface::operator = (Surface *s) {
 
 int Surface::box(Sint16 x, Sint16 y, Sint16 w, Sint16 h, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
 	// return boxRGBA(raw,x,y,x+w-1,y+h-1,r,g,b,a);
-	return boxRGBA(SDL_GetRenderer(this->_sdlWindow),x,y,x+w-1,y+h-1,r,g,b,a);
+	return boxRGBA(surface2Renderer(raw),x,y,x+w-1,y+h-1,r,g,b,a);
 }
 int Surface::box(SDL_Rect re, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
 	// return boxRGBA(raw,re.x,re.y,re.x+re.w-1,re.y+re.h-1,r,g,b,a);
-	return boxRGBA(SDL_GetRenderer(this->_sdlWindow),re.x,re.y,re.x+re.w-1,re.y+re.h-1,r,g,b,a);
+	return boxRGBA(surface2Renderer(raw),re.x,re.y,re.x+re.w-1,re.y+re.h-1,r,g,b,a);
 }
 int Surface::box(SDL_Rect re, Uint8 r, Uint8 g, Uint8 b) {
 	return SDL_FillRect(raw, &re, SDL_MapRGBA(format(),r,g,b,255));
@@ -327,19 +340,19 @@ int Surface::box(SDL_Rect re, RGBAColor c) {
 
 int Surface::rectangle(Sint16 x, Sint16 y, Sint16 w, Sint16 h, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
 	// return rectangleRGBA(raw,x,y,x+w-1,y+h-1,r,g,b,a);
-	return rectangleRGBA(SDL_GetRenderer(this->_sdlWindow),x,y,x+w-1,y+h-1,r,g,b,a);
+	return rectangleRGBA(surface2Renderer(raw),x,y,x+w-1,y+h-1,r,g,b,a);
 }
 int Surface::rectangle(SDL_Rect re, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
 	// return rectangleRGBA(raw,re.x,re.y,re.x+re.w-1,re.y+re.h-1,r,g,b,a);
-	return rectangleRGBA(SDL_GetRenderer(this->_sdlWindow),re.x,re.y,re.x+re.w-1,re.y+re.h-1,r,g,b,a);
+	return rectangleRGBA(surface2Renderer(raw),re.x,re.y,re.x+re.w-1,re.y+re.h-1,r,g,b,a);
 }
 int Surface::rectangle(Sint16 x, Sint16 y, Sint16 w, Sint16 h, Uint8 r, Uint8 g, Uint8 b) {
 	// return rectangleColor(raw, x,y,x+w-1,y+h-1, SDL_MapRGBA(format(),r,g,b,255));
-	return rectangleColor(SDL_GetRenderer(this->_sdlWindow), x,y,x+w-1,y+h-1, SDL_MapRGBA(format(),r,g,b,255));
+	return rectangleColor(surface2Renderer(raw), x,y,x+w-1,y+h-1, SDL_MapRGBA(format(),r,g,b,255));
 }
 int Surface::rectangle(SDL_Rect re, Uint8 r, Uint8 g, Uint8 b) {
 	// return rectangleColor(raw, re.x,re.y,re.x+re.w-1,re.y+re.h-1, SDL_MapRGBA(format(),r,g,b,255));
-	return rectangleColor(SDL_GetRenderer(this->_sdlWindow), re.x,re.y,re.x+re.w-1,re.y+re.h-1, SDL_MapRGBA(format(),r,g,b,255));
+	return rectangleColor(surface2Renderer(raw), re.x,re.y,re.x+re.w-1,re.y+re.h-1, SDL_MapRGBA(format(),r,g,b,255));
 }
 int Surface::rectangle(Sint16 x, Sint16 y, Sint16 w, Sint16 h, RGBAColor c) {
 	return rectangle(x,y,w,h,c.r,c.g,c.b,c.a);
@@ -350,7 +363,7 @@ int Surface::rectangle(SDL_Rect re, RGBAColor c) {
 
 int Surface::hline(Sint16 x, Sint16 y, Sint16 w, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
 	// return hlineRGBA(raw,x,x+w-1,y,r,g,b,a);
-	return hlineRGBA(SDL_GetRenderer(this->_sdlWindow),x,x+w-1,y,r,g,b,a);
+	return hlineRGBA(surface2Renderer(raw),x,x+w-1,y,r,g,b,a);
 }
 int Surface::hline(Sint16 x, Sint16 y, Sint16 w, RGBAColor c) {
 	return hline(x,y,w-1,c.r,c.g,c.b,c.a);
@@ -393,4 +406,11 @@ bool Surface::blit(Surface *destination, SDL_Rect container, const unsigned shor
 
 void Surface::setSDLWindow(SDL_Window* sdlWindow){
 	this->_sdlWindow=sdlWindow;
+}
+
+SDL_Renderer* Surface::surface2Renderer(SDL_Surface* sdlSurface){
+	if(NULL==_softRenderer){
+		_softRenderer = SDL_CreateSoftwareRenderer(sdlSurface);
+	}
+	return _softRenderer;
 }
