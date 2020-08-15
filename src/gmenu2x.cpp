@@ -321,8 +321,8 @@ GMenu2X::GMenu2X() {
                               resX,resY,  
                               SDL_WINDOW_OPENGL);  
     SDL_Surface* sdlSurface = SDL_GetWindowSurface(sdlWindow);
-	s->setSDLWindow(sdlWindow);
 	s->raw = sdlSurface;
+	Surface::sdlWindow = sdlWindow;
 
 	SDL_ShowCursor(0);
 	

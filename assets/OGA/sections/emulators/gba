@@ -1,8 +1,9 @@
 title=GBA游戏
 description=GBA Emulator
 icon=icons/regba.png
-exec=/home/cpi/apps/emulators/gPsp/gpsp
-selectordir=/home/cpi/games/GBA/
+exec=emuelecRunEmu.sh 
+params=$1 -Pgba --controllers="%CONTROLLERSCONFIG%"
+selectordir=/storage/roms/gba/
 selectorfilter=gba,zip
 selectorscreens=images/GBA
 wrapper=true

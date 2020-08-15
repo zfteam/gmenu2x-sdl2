@@ -38,7 +38,7 @@ SDL_Color rgbatosdl(RGBAColor color) {
 	return (SDL_Color){color.r, color.g, color.b, color.a};
 }
 
-
+SDL_Window* Surface::sdlWindow=NULL;
 
 Surface::Surface() {
 	raw = NULL;
@@ -79,7 +79,6 @@ Surface::Surface(Surface *s) {
 	dblbuffer = NULL;
 	_softRenderer = NULL;
 	this->operator =(s->raw);
-	this->_sdlWindow = s->_sdlWindow;
 }
 
 Surface::Surface(int w, int h, Uint32 flags) {
@@ -130,13 +129,14 @@ void Surface::enableAlpha() {
 }
 
 void Surface::free() {
-	SDL_FreeSurface( raw );
-	SDL_FreeSurface( dblbuffer );
-
 	if(NULL!=_softRenderer){
 		SDL_DestroyRenderer(_softRenderer);
 	}
 
+	SDL_FreeSurface( raw );
+	SDL_FreeSurface( dblbuffer );
+
+	_softRenderer = NULL;
 	raw = NULL;
 	dblbuffer = NULL;
 }
@@ -190,10 +190,14 @@ void Surface::flip() {
 	if (dblbuffer!=NULL) {
 		this->blit(dblbuffer,0,0);
 		// SDL_Flip(dblbuffer);
-		SDL_UpdateWindowSurface(this->_sdlWindow);
+		if(Surface::sdlWindow){
+			SDL_UpdateWindowSurface(Surface::sdlWindow);
+		}
 	} else {
 		// SDL_Flip(raw);
-		SDL_UpdateWindowSurface(this->_sdlWindow);
+		if(Surface::sdlWindow){
+			SDL_UpdateWindowSurface(Surface::sdlWindow);
+		}
 	}
 }
 
@@ -404,9 +408,6 @@ bool Surface::blit(Surface *destination, SDL_Rect container, const unsigned shor
 	return blit(destination,container.x,container.y);
 }
 
-void Surface::setSDLWindow(SDL_Window* sdlWindow){
-	this->_sdlWindow=sdlWindow;
-}
 
 SDL_Renderer* Surface::surface2Renderer(SDL_Surface* sdlSurface){
 	if(NULL==_softRenderer){

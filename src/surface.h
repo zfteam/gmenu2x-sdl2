@@ -45,7 +45,6 @@ private:
 	int halfW, halfH;
 	SDL_Surface *dblbuffer;
 
-	SDL_Window* _sdlWindow;
 	SDL_Renderer* _softRenderer;
 public:
 	Surface();
@@ -59,6 +58,7 @@ public:
 	void enableVirtualDoubleBuffer(SDL_Surface *surface, bool alpha=true);
 	void enableAlpha();
 
+	static SDL_Window* sdlWindow;
 	SDL_Surface *raw;
 
 	void free();
@@ -104,7 +104,6 @@ public:
 	int hline(Sint16, Sint16, Sint16, Uint8, Uint8, Uint8, Uint8);
 	int hline(Sint16, Sint16, Sint16, RGBAColor);
 
-	void setSDLWindow(SDL_Window* sdlWindow);
 
 	SDL_Renderer* surface2Renderer(SDL_Surface* sdlSurface);
 
